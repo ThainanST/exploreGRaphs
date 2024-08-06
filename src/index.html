@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de Oferta e Demanda</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/katex/0.13.18/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/katex/0.13.18/katex.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.1.1/d3.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #katex-container { position: absolute; top: 20px; left: 20px; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="katex-container"></div>
+    <script>
+        // Configuração da cena, câmera e renderizador do Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Função de plotagem usando D3.js
+        function plotGraph(data, color) {
+        const geometry = new THREE.BufferGeometry();
+        const vertices = new Float32Array(data.length * 3); // 3 componentes por vértice (x, y, z)
+        data.forEach((d, i) => {
+            vertices[i * 3] = d.x;
+            vertices[i * 3 + 1] = d.y;
+            vertices[i * 3 + 2] = 0; // z é 0 porque estamos desenhando em 2D
+        });
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        const material = new THREE.LineBasicMaterial({ color });
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+    }
+
+        // Dados de oferta e demanda
+        const oferta = d3.range(10).map(x => ({ x, y: x * 0.5 + 1 }));
+        const demanda = d3.range(10).map(x => ({ x, y: -x * 0.5 + 5 }));
+
+        // Plotando as curvas
+        plotGraph(oferta);
+        plotGraph(demanda);
+
+        // Ajustando a posição da câmera
+        camera.position.z = 10;
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Renderização de fórmulas matemáticas usando KaTeX
+        const katexContainer = document.getElementById('katex-container');
+        katex.render("\\text{Oferta: } Q = 2P + 1", katexContainer, { throwOnError: false });
+        katex.render("\\text{Demanda: } Q = 5 - 2P", katexContainer, { throwOnError: false });
+    </script>
+</body>
+</html>
